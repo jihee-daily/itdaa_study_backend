@@ -66,30 +66,30 @@ public class RoadAddrApiController {
              2-3. 만약 searchBldgNumber 가 입력되고, 그 값에 '-' 이 포함되면 '건물 본번 - 건물 부번' 인 형태입니다.
              */
             // searchBldgNumber null 이 아니면 건물번호가 입력된 것 입니다.
-            if (searchBldgNumber ) {
+            if (searchBldgNumber != null) {
 
                 // 건물번호가 본번 형태인지 부번 형태인지 '-' 을 기준으로 확인해야 합니다.
-                String[] bldgNumberArray =
+                String[] bldgNumberArray = searchBldgNumber.split("-");
 
                 // 건물번호가 본번만 입력된 형태라면 (예 : 흑석로 84)
-                if (bldgNumberArray.length == ) {
+                if (bldgNumberArray.length == 1) {
 
                     // 건물번호가 문자로 되어 있으므로 숫자로 바꿔야 합니다. (DB는 숫자컬럼으로 되어 있음)
-                    buildingMainNumber = Integer.parseInt();
+                    buildingMainNumber = Integer.parseInt(bldgNumberArray[0]);
 
                     // 도로명 검색어를 Like 로 하여 건물번호가 일치하는 도로명 주소를 찾습니다.
-                    searchResultList = roadAddrRepository.;
+                    searchResultList = roadAddrRepository.findByRoadNameStartingWithAndBldgMainNo(searchRoadAddress, buildingMainNumber);
 
                 }
                 // 건물번호가 본번,부번 모두 입력된 형태라면 (예 : 흑석로 84-116)
-                else if (bldgNumberArray.length == ) {
+                else if (bldgNumberArray.length == 2) {
 
                     // 건물번호(본번/부번)이 문자로 되어 있으므로 숫자로 바꿔야 합니다. (DB는 숫자컬럼으로 되어 있음)
-                    buildingMainNumber = bldgNumberArray[0];
-                    buildingSubNumber = bldgNumberArray[1];
+                    buildingMainNumber = Integer.parseInt(bldgNumberArray[0]);
+                    buildingSubNumber = Integer.parseInt(bldgNumberArray[1]);
 
                     // 도로명 검색어를 = 로 하여 건물본번, 건물부번 모두가 일치하는 도로명 주소를 찾습니다.
-                    searchResultList = roadAddrRepository.;
+                    searchResultList = roadAddrRepository.findByRoadNameAndBldgMainNoAndBldgSubNo(searchRoadAddress, buildingMainNumber, buildingSubNumber);
                 }
             }
             // searchBldgNumber null 이면 도로명 검색어만 입력된 것입니다.
@@ -100,7 +100,7 @@ public class RoadAddrApiController {
 
             }
 
-            searchResultListSize = searchResultList; // 최종적으로 DB에서 도로명 주소를 찾은 결과의 갯수
+            searchResultListSize = searchResultList.size(); // 최종적으로 DB에서 도로명 주소를 찾은 결과의 갯수
 
             // 도로명 주소가 검색된 결과가 없다면.
             if (searchResultListSize == 0) {
@@ -108,8 +108,8 @@ public class RoadAddrApiController {
             }
 
             returnMap.put(resMsg, "정상처리되었습니다.");    // return 메세지는 "정상" 으로 하고
-            returnMap.put(resRoadAddr, );  // return 주소정보는 조회 결과를 넣습니다.
-            returnMap.put(resCnt, ); // return 건수정보는 조회 결과의 건수를 넣습니다.
+            returnMap.put(resRoadAddr, searchResultList);  // return 주소정보는 조회 결과를 넣습니다.
+            returnMap.put(resCnt, searchResultListSize); // return 건수정보는 조회 결과의 건수를 넣습니다.
 
         }
         // 실행중 예외가 발생할 경우
